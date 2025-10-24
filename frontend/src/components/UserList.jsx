@@ -4,12 +4,12 @@ import axios from "axios";
 const UserList = () => {
   const [users, setUsers] = useState([]);
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:3000/api/users")
-      .then((res) => setUsers(res.data))
-      .catch((err) => console.error("Lỗi khi lấy danh sách user:", err));
-  }, []);
+useEffect(() => {
+  axios.get('http://localhost:3000/api/users')
+    .then(res => setUsers(res.data))
+    .catch(err => console.error('❌ Lỗi khi lấy danh sách user:', err));
+}, []);
+
 
   return (
     <div>

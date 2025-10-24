@@ -18,13 +18,17 @@ const AddUser = ({ onUserAdded }) => {
         name,
         email,
       });
+      console.log("✅ Server phản hồi:", res.data); // Log để kiểm tra phản hồi
       onUserAdded(res.data);
       setName("");
       setEmail("");
     } catch (err) {
-      console.error("Lỗi khi thêm user:", err);
+      console.error(
+        "❌ Lỗi khi thêm user:",
+        err.response ? err.response.data : err.message
+      );
     }
-  };
+  }; // <-- đây là ngoặc kết thúc handleSubmit ✅
 
   return (
     <div>
