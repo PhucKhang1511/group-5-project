@@ -18,9 +18,13 @@ const userRoutes = require('./routes/user');
 app.use('/api', userRoutes); // /api + /users → /api/users
 
 // 🟩 Kết nối MongoDB Atlas
-mongoose.connect('mongodb+srv://Nhom5pt:15112004@cluster0.o0kful3.mongodb.net/groupDB?retryWrites=true&w=majority')
+mongoose.connect('mongodb+srv://Nhom5pt:15112004@cluster0.o0kful3.mongodb.net/groupDB?retryWrites=true&w=majority&appName=Cluster0')
   .then(() => console.log('✅ Kết nối MongoDB Atlas thành công'))
-  .catch(err => console.error('❌ Lỗi kết nối MongoDB:', err));
+  .catch(err => {
+    console.error('❌ Lỗi kết nối MongoDB:', err);
+    process.exit(1); // Thoát nếu MongoDB không kết nối được
+  });
+
 
 // 🟩 Cổng server chạy
 const PORT = process.env.PORT || 5000;
