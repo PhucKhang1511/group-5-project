@@ -1,55 +1,62 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const AddUser = ({ onUserAdded }) => {
+function AddUser({ fetchUsers }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !email) {
-      alert("Vui lòng nhập đầy đủ thông tin!");
+    // 🔸 Validation
+    if (!name.trim()) {
+      setError("⚠️ Name không được để trống!");
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError("⚠️ Email không hợp lệ!");
       return;
     }
 
     try {
-      const res = await axios.post("http://localhost:3000/api/users", {
-        name,
-        email,
-      });
-      console.log("✅ Server phản hồi:", res.data); // Log để kiểm tra phản hồi
-      onUserAdded(res.data);
+      await axios.post("http://localhost:5000/api/users", { name, email });
       setName("");
       setEmail("");
+      setError("");
+      fetchUsers(); // cập nhật danh sách sau khi thêm
     } catch (err) {
-      console.error(
-        "❌ Lỗi khi thêm user:",
-        err.response ? err.response.data : err.message
-      );
+      console.error("❌ Lỗi khi thêm user:", err);
+      setError("Không thể thêm user. Kiểm tra kết nối server!");
     }
-  }; // <-- đây là ngoặc kết thúc handleSubmit ✅
+  };
 
   return (
-    <div>
-      <h2>Thêm người dùng mới</h2>
+    <div style={{ marginBottom: "20px" }}>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Tên người dùng"
+          placeholder="Tên"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <input
           type="email"
-          placeholder="Email người dùng"
+          placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <button type="submit">Thêm</button>
       </form>
+
+      {/* Hiển thị lỗi nếu có */}
+      {error && <p style={{ color: "red", fontWeight: "bold" }}>{error}</p>}
     </div>
   );
-};
+}
 
 export default AddUser;
+
+
+
