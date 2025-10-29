@@ -16,8 +16,22 @@ function App() {
   const [isRegister, setIsRegister] = useState(false);
   const [token, setToken] = useState(localStorage.getItem("token"));
 
+  // 🔄 Tự động cập nhật token nếu localStorage thay đổi
+useEffect(() => {
+  const newToken = localStorage.getItem("token");
+  if (newToken !== token) {
+    console.log("🔁 Token cập nhật:", newToken);
+    setToken(newToken);
+  }
+}, [token]);
+
+
   // 🟩 Lấy danh sách user (chỉ dành cho admin)
   const fetchUsers = useCallback(async () => {
+
+    console.log("🔑 Token gửi đi:", token);
+
+
     if (!token) return;
     try {
       const res = await axios.get(API_URL, {
@@ -31,6 +45,10 @@ function App() {
 
   // 🟩 Lấy thông tin profile (để biết user là ai và role gì)
   const fetchProfile = useCallback(async () => {
+
+    console.log("🔑 Token gửi đi:", token);
+
+
     if (!token) return;
     try {
       const res = await axios.get(PROFILE_URL, {
