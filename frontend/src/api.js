@@ -2,23 +2,24 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "http://localhost:5000/api",
+  withCredentials: false,
 });
 
-// 🟢 Tự động gắn Access Token vào Header
+// Thêm access token vào mỗi request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// 🟡 Khi Access Token hết hạn → tự refresh token
+// Tự động refresh token nếu gặp 403
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response && error.response.status === 401) {
-      console.log("⚠️ Access Token hết hạn → Đang làm mới token...");
+    const originalRequest = error.config;
+
+    if (error.response && error.response.status === 403 && !originalRequest._retry) {
+      originalRequest._retry = true;
 
       const refreshToken = localStorage.getItem("refreshToken");
 
@@ -27,19 +28,19 @@ api.interceptors.response.use(
           refreshToken,
         });
 
-        // Lưu token mới
+        // lưu token mới
         localStorage.setItem("accessToken", res.data.accessToken);
 
-        // Gửi lại request cũ với token mới
-        error.config.headers.Authorization = `Bearer ${res.data.accessToken}`;
-        return api(error.config);
-
-      } catch (refreshError) {
-        console.log("❌ Refresh token hết hạn → Đăng xuất!");
+        // gắn token mới vào request cũ & chạy lại
+        originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
+        return api(originalRequest);
+      } catch (err) {
+        console.log("Refresh token hết hạn → Đăng xuất");
         localStorage.clear();
         window.location.href = "/login";
       }
     }
+
     return Promise.reject(error);
   }
 );

@@ -13,7 +13,7 @@ router.get("/test", (req, res) => res.json({ message: "✅ Auth route hoạt đ�
 
 // Tạo Access Token
 const generateAccessToken = (user) =>
-  jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: "15s" });
+  jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: "30s" });
 
 // Tạo Refresh Token
 const generateRefreshToken = (user) =>

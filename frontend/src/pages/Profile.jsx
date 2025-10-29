@@ -1,25 +1,14 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api"; // dùng api, không dùng axios
 
 function Profile() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      alert("Bạn chưa đăng nhập!");
-      window.location.href = "/login";
-      return;
-    }
-
-    axios
-      .get("http://localhost:5000/api/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setUser(res.data))
-      .catch(() => {
-        alert("Phiên đăng nhập hết hạn!");
-        window.location.href = "/login";
+    api.get("/profile")
+      .then((res) => setUser(res.data))   // vì backend trả { name, email, role }
+      .catch((err) => {
+        console.log("Lỗi /profile:", err);
       });
   }, []);
 
