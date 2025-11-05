@@ -7,45 +7,51 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    console.log("🔄 Gửi yêu cầu đăng nhập...");
 
     try {
-    const res = await axios.post("http://localhost:5000/api/auth/login", {
-    email,
-    password,
-});
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
+        email,
+        password,
+      });
 
-
-      console.log("✅ Server trả về:", res.data);
-
-      // Lưu token
+      // ✅ Lưu token và role
       localStorage.setItem("accessToken", res.data.accessToken);
       localStorage.setItem("refreshToken", res.data.refreshToken);
+      localStorage.setItem("role", res.data.role);
 
       alert("Đăng nhập thành công ✅");
-      window.location.href = "/profile";
+
+      // ✅ Điều hướng theo role
+      if (res.data.role === "admin") {
+        window.location.href = "/admin";
+      } else {
+        window.location.href = "/profile";
+      }
     } catch (err) {
-      console.log("❌ Lỗi đăng nhập:", err.response?.data || err);
-      alert("Sai thông tin đăng nhập!");
+      alert("Sai email hoặc mật khẩu ❌");
+      console.log("Login error:", err);
     }
   };
 
   return (
-    <form onSubmit={handleLogin} style={{ margin: 20 }}>
-      <input
-        type="email"
-        placeholder="Nhập email..."
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Nhập mật khẩu..."
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button type="submit">Đăng nhập</button>
-    </form>
+    <div style={{ margin: 20 }}>
+      <h2>Đăng nhập hệ thống</h2>
+      <form onSubmit={handleLogin}>
+        <input
+          type="email"
+          placeholder="Nhập email..."
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Nhập mật khẩu..."
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button type="submit">Đăng nhập</button>
+      </form>
+    </div>
   );
 }
 
