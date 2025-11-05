@@ -1,80 +1,51 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import api from "../api";
 
 function AdminPage() {
   const [users, setUsers] = useState([]);
-  const token = localStorage.getItem("token");
 
-  // 🟩 Lấy danh sách user khi mở trang
   useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await api.get("/users"); // ✅ ĐÃ SỬA ĐÚNG
+        setUsers(res.data);
+      } catch (err) {
+        console.log(err);
+        alert("Bạn không có quyền hoặc token hết hạn!");
+        window.location.href = "/login";
+      }
+    };
+
     fetchUsers();
   }, []);
 
-  const fetchUsers = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/users", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsers(res.data);
-    } catch (err) {
-      console.error("❌ Lỗi khi lấy danh sách user:", err);
-      alert("Bạn không có quyền hoặc token hết hạn!");
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Bạn có chắc muốn xóa người dùng này không?")) return;
-    try {
-      await axios.delete(`http://localhost:5000/api/users/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      alert("✅ Đã xóa user thành công!");
-      fetchUsers();
-    } catch (err) {
-      console.error("❌ Lỗi khi xóa user:", err);
-      alert("Không thể xóa user!");
-    }
-  };
-
   return (
-    <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
-      <h1>👑 Quản lý người dùng (Admin)</h1>
-      <h3>Danh sách tài khoản</h3>
+    <div className="min-h-screen bg-[#f3f4f6] py-10">
+      <h1 className="text-center text-2xl font-bold mb-6">Admin Dashboard</h1>
 
-      <table border="1" cellPadding="6" style={{ borderCollapse: "collapse" }}>
-        <thead>
-          <tr>
-            <th>Tên</th>
-            <th>Email</th>
-            <th>Vai trò</th>
-            <th>Thao tác</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((u) => (
-            <tr key={u._id}>
-              <td>{u.name}</td>
-              <td>{u.email}</td>
-              <td>{u.role}</td>
-              <td>
-                <button
-                  onClick={() => handleDelete(u._id)}
-                  style={{
-                    backgroundColor: "#e74c3c",
-                    color: "white",
-                    border: "none",
-                    padding: "5px 10px",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Xóa
-                </button>
-              </td>
+      <div className="max-w-3xl mx-auto bg-white shadow-md rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-4">Danh sách người dùng</h2>
+
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-200 text-left">
+              <th className="p-2 border">Tên</th>
+              <th className="p-2 border">Email</th>
+              <th className="p-2 border">Vai trò</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {users.map((u, i) => (
+              <tr key={i} className="hover:bg-gray-100">
+                <td className="p-2 border">{u.name}</td>
+                <td className="p-2 border">{u.email}</td>
+                <td className="p-2 border text-blue-700 font-semibold">{u.role}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

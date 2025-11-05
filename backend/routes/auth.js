@@ -1,19 +1,21 @@
+const auth = require("../middleware/auth");
 require("dotenv").config();
 console.log("✅ routes/auth.js loaded");
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const User = require("../models/user");
 const RefreshToken = require("../models/RefreshToken");
 
 const router = express.Router();
 
-// 🧪 Test route
-router.get("/test", (req, res) => res.json({ message: "✅ Auth route hoạt động!" }));
-
 // Tạo Access Token
 const generateAccessToken = (user) =>
-  jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: "30s" });
+  jwt.sign(
+    { id: user._id, email: user.email, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  );
 
 // Tạo Refresh Token
 const generateRefreshToken = (user) =>
@@ -41,7 +43,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// 🟡 Đăng nhập → trả về Access + Refresh Token
+// 🟡 Đăng nhập
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -55,7 +57,7 @@ router.post("/login", async (req, res) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    await RefreshToken.deleteMany({ userId: user._id }); // Xóa token cũ
+    await RefreshToken.deleteMany({ userId: user._id });
     await RefreshToken.create({
       userId: user._id,
       token: refreshToken,
@@ -66,6 +68,7 @@ router.post("/login", async (req, res) => {
       message: "✅ Đăng nhập thành công!",
       accessToken,
       refreshToken,
+      role: user.role, // ✅ Quan trọng để frontend điều hướng admin
     });
 
   } catch (err) {
@@ -73,7 +76,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// 🔁 Làm mới Access Token
+// 🔁 Refresh token
 router.post("/refresh", async (req, res) => {
   const { refreshToken } = req.body;
 
@@ -86,9 +89,7 @@ router.post("/refresh", async (req, res) => {
 
   try {
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
-
-    const newAccessToken = generateAccessToken({ _id: decoded.id });
-
+    const newAccessToken = generateAccessToken(await User.findById(decoded.id));
     res.json({ accessToken: newAccessToken });
 
   } catch {
@@ -96,11 +97,44 @@ router.post("/refresh", async (req, res) => {
   }
 });
 
-// 🔴 Đăng xuất → Xóa Refresh Token
+// 🔴 Đăng xuất
 router.post("/logout", async (req, res) => {
   const { refreshToken } = req.body;
   await RefreshToken.deleteOne({ token: refreshToken });
   res.json({ message: "👋 Đăng xuất thành công!" });
 });
 
+// 🟢 Lấy thông tin người dùng
+router.get("/profile", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng!" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server!" });
+  }
+});
+
+// 🟡 Cập nhật thông tin cá nhân
+router.put("/update", auth, async (req, res) => {
+  try {
+    const { name, email } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { name, email },
+      { new: true }
+    ).select("-password");
+
+    res.json({
+      message: "✅ Cập nhật thành công!",
+      user,
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server khi cập nhật!" });
+  }
+});
+
+// ✅ Đặt dòng này CUỐI CÙNG
 module.exports = router;

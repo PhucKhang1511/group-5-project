@@ -6,7 +6,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
 const bcrypt = require("bcryptjs");
-const User = require("./models/User");
+const User = require("./models/user");
 
 const app = express();
 
@@ -39,7 +39,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/upload-avatar", uploadAvatarRoutes);
-
+app.use("/api/users", require("./routes/user"));
+app.use("/api/upload", require("./routes/uploadavatar"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.get("/", (req, res) => {
