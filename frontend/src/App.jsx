@@ -4,7 +4,7 @@ import Profile from "./pages/Profile";
 import Navbar from "./components/Navbar";
 import Dashboard from "./Dashboard";
 import AdminPage from "./pages/AdminPage";
-import ProtectedRoute from "./components/ProtectedRoute"; // ✅ Thêm dòng này
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -16,7 +16,6 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
 
-        {/* ✅ Trang profile: chỉ cần login */}
         <Route
           path="/profile"
           element={
@@ -26,7 +25,6 @@ function App() {
           }
         />
 
-        {/* ✅ Trang admin: chỉ cho admin truy cập */}
         <Route
           path="/admin"
           element={
