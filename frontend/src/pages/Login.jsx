@@ -1,35 +1,36 @@
 import { useState } from "react";
-import axios from "axios";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import api from "../api";
+import { loginSuccess } from "../slices/authSlice";
 
 function Login() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
+      const res = await api.post("/auth/login", { email, password });
 
-      // ✅ Lưu token và role
-      localStorage.setItem("accessToken", res.data.accessToken);
-      localStorage.setItem("refreshToken", res.data.refreshToken);
-      localStorage.setItem("role", res.data.role);
+      // ✅ Lưu vào Redux (và localStorage tự lưu bên trong slice)
+      dispatch(
+        loginSuccess({
+          token: res.data.accessToken,
+          role: res.data.role,
+        })
+      );
 
-      alert("Đăng nhập thành công ✅");
+      alert("✅ Đăng nhập thành công!");
 
-      // ✅ Điều hướng theo role
-      if (res.data.role === "admin") {
-        window.location.href = "/admin";
-      } else {
-        window.location.href = "/profile";
-      }
+      // ✅ Điều hướng theo quyền
+      navigate(res.data.role === "admin" ? "/admin" : "/profile");
     } catch (err) {
-      alert("Sai email hoặc mật khẩu ❌");
-      console.log("Login error:", err);
+      alert("❌ Sai email hoặc mật khẩu!");
+      console.log("Login error:", err?.response?.data || err);
     }
   };
 
@@ -42,14 +43,32 @@ function Login() {
           placeholder="Nhập email..."
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          style={{ display: "block", marginBottom: 10, padding: 6, width: 240 }}
+          required
         />
+
         <input
           type="password"
           placeholder="Nhập mật khẩu..."
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          style={{ display: "block", marginBottom: 10, padding: 6, width: 240 }}
+          required
         />
-        <button type="submit">Đăng nhập</button>
+
+        <button
+          type="submit"
+          style={{
+            padding: "6px 12px",
+            background: "#007bff",
+            border: "none",
+            color: "white",
+            borderRadius: 4,
+            cursor: "pointer",
+          }}
+        >
+          Đăng nhập
+        </button>
       </form>
     </div>
   );
