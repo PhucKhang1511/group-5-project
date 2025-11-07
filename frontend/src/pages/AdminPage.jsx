@@ -4,53 +4,111 @@ import api from "../api";
 function AdminPage() {
   const [users, setUsers] = useState([]);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await api.get("/users"); // ✅ Tự thêm token qua interceptor
-        setUsers(res.data);
-      } catch (err) {
-        console.error("Lỗi load danh sách:", err);
-        alert("❌ Bạn không có quyền hoặc token đã hết hạn!");
-        window.location.href = "/login";
-      }
-    };
+  const fetchUsers = async () => {
+    try {
+      const res = await api.get("/users");
+      setUsers(res.data);
+    } catch (err) {
+      alert("❌ Token hết hạn hoặc bạn không có quyền!");
+      window.location.href = "/login";
+    }
+  };
 
+  useEffect(() => {
     fetchUsers();
   }, []);
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Bạn có chắc muốn xóa user này không?")) return;
+    try {
+      await api.delete(`/users/${id}`);
+      alert("🗑️ Xóa thành công!");
+      fetchUsers();
+    } catch {
+      alert("❌ Lỗi khi xóa user!");
+    }
+  };
+
+  const handleEdit = async (user) => {
+    const newName = prompt("Nhập tên mới:", user.name);
+    const newEmail = prompt("Nhập email mới:", user.email);
+    const newRole = prompt("Vai trò (admin/user/moderator):", user.role);
+
+    if (!newName || !newEmail) return alert("❌ Không được để trống!");
+
+    try {
+      await api.put(`/users/${user._id}`, {
+        name: newName,
+        email: newEmail,
+        role: newRole,
+      });
+      alert("✅ Cập nhật thành công!");
+      fetchUsers();
+    } catch {
+      alert("❌ Lỗi cập nhật!");
+    }
+  };
+
+  const handleAdd = async () => {
+    const name = prompt("Tên user:");
+    const email = prompt("Email:");
+    const password = prompt("Mật khẩu:");
+    const role = prompt("Vai trò (admin/user/moderator):", "user");
+
+    if (!name || !email || !password) return alert("❌ Thiếu thông tin!");
+
+    try {
+      await api.post("/users", { name, email, password, role });
+      alert("✅ Thêm user thành công!");
+      fetchUsers();
+    } catch {
+      alert("❌ Lỗi thêm user!");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 py-12 flex justify-center">
-      <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-8">
-        <h1 className="text-center text-2xl font-bold mb-8">Group18 Project</h1>
+    <div style={{ padding: "20px" }}>
 
-        <h2 className="text-xl font-semibold mb-2">Admin Dashboard</h2>
-        <p className="text-gray-600 mb-6">Trang dành riêng cho Admin.</p>
+      <h2 style={{ marginBottom: "10px" }}>📌 Admin Dashboard</h2>
 
-        <h3 className="font-semibold mb-4">Danh sách người dùng:</h3>
+      {/* ✅ Nút Thêm User */}
+      <button className="btn btn-add" onClick={handleAdd}>
+        + Thêm User
+      </button>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border border-gray-300">
-            <thead className="bg-gray-200">
-              <tr>
-                <th className="p-2 border">Tên</th>
-                <th className="p-2 border">Email</th>
-                <th className="p-2 border">Vai trò</th>
-              </tr>
-            </thead>
+      <table border="1" cellPadding="10" style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr style={{ background: "#f0f0f0" }}>
+            <th>Tên</th>
+            <th>Email</th>
+            <th>Vai trò</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
 
-            <tbody>
-              {users.map((user, index) => (
-                <tr key={index} className="hover:bg-gray-100">
-                  <td className="p-2 border">{user.name}</td>
-                  <td className="p-2 border">{user.email}</td>
-                  <td className="p-2 border text-blue-600 font-medium">{user.role}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <tbody>
+          {users.map((user) => (
+            <tr key={user._id}>
+              <td>{user.name}</td>
+              <td>{user.email}</td>
+              <td style={{ color: "blue", fontWeight: "bold" }}>{user.role}</td>
+
+              <td>
+                {/* ✅ Nút Sửa */}
+                <button className="btn btn-edit" onClick={() => handleEdit(user)}>
+                  ✏ Sửa
+                </button>
+
+                {/* ✅ Nút Xóa */}
+                <button className="btn btn-delete" onClick={() => handleDelete(user._id)}>
+                  🗑 Xóa
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
     </div>
   );
 }

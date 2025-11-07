@@ -6,7 +6,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const RefreshToken = require("../models/RefreshToken");
-
+const crypto = require("crypto");
+const sendMail = require("../utils/sendMail");
 const router = express.Router();
 
 // Tạo Access Token
@@ -75,6 +76,68 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ message: "Lỗi server khi đăng nhập!" });
   }
 });
+
+// 🟢 Quên mật khẩu
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.json({ message: "Nếu email tồn tại, chúng tôi đã gửi link đặt lại mật khẩu!" });
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 phút
+    await user.save();
+
+    const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
+
+    await sendMail(
+      email,
+      "Khôi phục mật khẩu",
+      `
+      <h3>Khôi phục mật khẩu</h3>
+      <p>Nhấn vào link bên dưới để đặt lại mật khẩu (có hiệu lực 15 phút):</p>
+      <a href="${resetLink}" target="_blank">${resetLink}</a>
+    `
+    );
+
+    res.json({ message: "✅ Vui lòng kiểm tra email của bạn!" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Lỗi server!" });
+  }
+});
+
+// 🟡 Đặt lại mật khẩu
+router.post("/reset-password/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() } 
+    });
+
+    if (!user)
+      return res.status(400).json({ message: "Token hết hạn hoặc không hợp lệ!" });
+
+    user.password = await bcrypt.hash(password, 10);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.json({ message: "✅ Mật khẩu mới đã được đặt!" });
+
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server!" });
+  }
+});
+
 
 // 🔁 Refresh token
 router.post("/refresh", async (req, res) => {

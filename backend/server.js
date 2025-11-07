@@ -32,7 +32,7 @@ const userRoutes = require("./routes/user");
 const authRoutes = require("./routes/auth");
 const profileRoutes = require("./routes/profile");
 const uploadAvatarRoutes = require("./routes/uploadavatar");
-
+const passwordRoutes = require("./routes/password");
 console.log("🚀 Đã load route user.js, auth.js, profile.js, và uploadavatar.js");
 
 app.use("/api/users", userRoutes);
@@ -42,7 +42,7 @@ app.use("/api/upload-avatar", uploadAvatarRoutes);
 app.use("/api/users", require("./routes/user"));
 app.use("/api/upload", require("./routes/uploadavatar"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
+app.use("/api", passwordRoutes);
 app.get("/", (req, res) => {
   res.send("✅ Backend đang hoạt động!");
 });
