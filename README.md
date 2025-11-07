@@ -35,3 +35,52 @@ Dự án **Quản lý Người Dùng (User Management System)** được phát t
 ### 1️⃣ Clone project
 ```bash
 git clone https://github.com/PhucKhang1511/group-5-project.git
+
+
+# Group 5 Project – MERN
+
+## 1) Tính năng
+- JWT Auth (access + refresh)
+- Rate limit login
+- RBAC (admin/mod/user)
+- Upload avatar (Cloudinary)
+- Reset password (Forgot → Reset link)
+- Logging hoạt động (Mongo collection `logs`)
+- Frontend: Redux Toolkit + Protected Routes
+
+## 2) Cấu hình
+### Backend `.env`
+\`\`\`
+PORT=5000
+MONGO_URI=mongodb+srv://Nhom5pt:15112004@cluster0.o0kful3.mongodb.net/groupDB?retryWrites=true&w=majority&appName=Cluster0
+JWT_SECRET=secretkey123
+CLOUDINARY_CLOUD_NAME=dv2mxc8lq
+CLOUDINARY_API_KEY=423657456818781
+CLOUDINARY_API_SECRET=Wi_yo7wIuyaqFBcLJUFdi7B0E-I
+RESET_TOKEN_SECRET=refreshkey456
+FRONTEND_URL=http://localhost:3000
+\`\`\`
+
+### Frontend `.env`
+\`\`\`
+REACT_APP_API_BASE=http://localhost:5000/api
+\`\`\`
+
+## 3) Chạy
+\`\`\`bash
+cd backend && npm i && npm run dev
+cd ../frontend && npm i && npm start
+\`\`\`
+
+## 4) API chính
+- POST `/api/auth/signup`
+- POST `/api/auth/login`
+- POST `/api/auth/refresh`
+- POST `/api/auth/forgot-password`
+- POST `/api/auth/reset-password`
+- GET `/api/auth/profile` (Auth)
+- PUT `/api/auth/update` (Auth)
+- GET `/api/users` (Auth + admin/mod)
+- DELETE `/api/users/:id` (Auth + admin)
+- POST `/api/users/avatar` (Auth, multipart)
+
