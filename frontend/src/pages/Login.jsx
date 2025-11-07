@@ -16,7 +16,6 @@ function Login() {
     try {
       const res = await api.post("/auth/login", { email, password });
 
-      // ✅ Lưu vào Redux (và localStorage tự lưu bên trong slice)
       dispatch(
         loginSuccess({
           token: res.data.accessToken,
@@ -25,8 +24,6 @@ function Login() {
       );
 
       alert("✅ Đăng nhập thành công!");
-
-      // ✅ Điều hướng theo quyền
       navigate(res.data.role === "admin" ? "/admin" : "/profile");
     } catch (err) {
       alert("❌ Sai email hoặc mật khẩu!");
@@ -35,41 +32,80 @@ function Login() {
   };
 
   return (
-    <div style={{ margin: 20 }}>
-      <h2>Đăng nhập hệ thống</h2>
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="Nhập email..."
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{ display: "block", marginBottom: 10, padding: 6, width: 240 }}
-          required
-        />
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "80vh",
+      }}
+    >
+      <div style={{ textAlign: "center", width: "300px" }}>
+        <h2 style={{ marginBottom: "20px" }}>Đăng nhập hệ thống</h2>
 
-        <input
-          type="password"
-          placeholder="Nhập mật khẩu..."
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ display: "block", marginBottom: 10, padding: 6, width: 240 }}
-          required
-        />
+        <form onSubmit={handleLogin}>
+          <input
+            type="email"
+            placeholder="Nhập email..."
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "8px",
+              marginBottom: "10px",
+              borderRadius: "5px",
+              border: "1px solid #ccc",
+            }}
+            required
+          />
 
-        <button
-          type="submit"
-          style={{
-            padding: "6px 12px",
-            background: "#007bff",
-            border: "none",
-            color: "white",
-            borderRadius: 4,
-            cursor: "pointer",
-          }}
-        >
-          Đăng nhập
-        </button>
-      </form>
+          <input
+            type="password"
+            placeholder="Nhập mật khẩu..."
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "8px",
+              marginBottom: "8px",
+              borderRadius: "5px",
+              border: "1px solid #ccc",
+            }}
+            required
+          />
+
+          {/* ✅ Nút Quên mật khẩu */}
+          <div style={{ textAlign: "right", marginBottom: "12px" }}>
+            <a
+              href="/forgot-password"
+              style={{
+                fontSize: "14px",
+                color: "#007bff",
+                cursor: "pointer",
+                textDecoration: "none",
+              }}
+            >
+              Quên mật khẩu?
+            </a>
+          </div>
+
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              padding: "8px",
+              background: "#007bff",
+              color: "#fff",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+          >
+            Đăng nhập
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

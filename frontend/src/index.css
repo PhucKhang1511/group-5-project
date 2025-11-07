@@ -11,3 +11,40 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.btn {
+  padding: 7px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-right: 8px;
+  transition: 0.25s;
+}
+
+/* Nút Thêm (Xanh lá) */
+.btn-add {
+  background-color: #28a745;
+  color: white;
+}
+.btn-add:hover {
+  background-color: #1f7a34;
+}
+
+/* Nút Sửa (Xanh dương) */
+.btn-edit {
+  background-color: #007bff;
+  color: white;
+}
+.btn-edit:hover {
+  background-color: #005dc0;
+}
+
+/* Nút Xóa (Đỏ) */
+.btn-delete {
+  background-color: #dc3545;
+  color: white;
+}
+.btn-delete:hover {
+  background-color: #b42030;
+}
